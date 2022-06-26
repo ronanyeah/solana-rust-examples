@@ -8,6 +8,8 @@ This is a library of Rust scripts for specific purposes:
 - [Get an associated token balance](#get-token-balance)
 - [Get the creation date of an account](#get-account-creation-timestamp)
 - [Get the owner of an NFT](#get-nft-owner)
+- [List NFTs in wallet](#list-nfts-in-wallet)
+- [Print NFT metadata](#print-nft-metadata)
 
 The scripts are found in the `src/bin` folder. They can be configured using environment variables, which are documented below.
 
@@ -89,3 +91,29 @@ Prints the wallet address that owns a specified NFT.
 | -------------------- | ------------------------------------------------- |
 | RPC_URL              | e.g. `https://api.mainnet-beta.solana.com`        |
 | MINT_ACCOUNT_PUBKEY  | The pubkey address of the SPL Token mint account. |
+
+---
+
+## List NFTs in wallet
+
+`cargo run --bin list_nfts` | [Code](./src/bin/list_nfts.rs)
+
+Fetches and prints the mint pubkeys of every NFT in the specified wallet.
+
+| Environment Variable | Note                                              |
+| -------------------- | ------------------------------------------------- |
+| RPC_URL              | e.g. `https://api.mainnet-beta.solana.com`        |
+| WALLET_PUBKEY        | The pubkey address of the wallet that owns the NFTs. |
+
+---
+
+## Print NFT metadata
+
+`cargo run --bin print_nft` | [Code](./src/bin/print_nft.rs)
+
+Fetches, decodes and prints the metadata of the specified NFT.
+
+| Environment Variable | Note                                              |
+| -------------------- | ------------------------------------------------- |
+| RPC_URL              | e.g. `https://api.mainnet-beta.solana.com`        |
+| MINT_ACCOUNT_PUBKEY  | The pubkey of the NFT's SPL Token mint account.   |
