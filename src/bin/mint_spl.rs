@@ -57,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("SPL Tokens minted successfully.");
     println!("Amount: {}", amount);
-    println!("Receiver pubkey: {}", signer_wallet.pubkey().to_string());
+    println!("Receiver pubkey: {}", receiver_pubkey.to_string());
     println!("Associated token account: {}", assoc.to_string());
 
     Ok(())

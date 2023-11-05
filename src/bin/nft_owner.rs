@@ -1,6 +1,6 @@
 use solana_client::rpc_client::RpcClient;
-use solana_sdk::pubkey::Pubkey;
-use solana_sdk::{account::ReadableAccount, program_pack::Pack};
+use solana_sdk::account::ReadableAccount;
+use solana_sdk::{program_pack::Pack, pubkey::Pubkey};
 
 #[derive(serde::Deserialize)]
 struct Env {
