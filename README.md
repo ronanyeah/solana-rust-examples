@@ -9,6 +9,7 @@ This is a library of Rust scripts for specific purposes:
 - [Get the creation date of an account](#get-account-creation-timestamp)
 - [Get the owner of an NFT](#get-nft-owner)
 - [List NFTs in wallet](#list-nfts-in-wallet)
+- [Subscribe to events](#subscribe-to-events)
 
 The scripts are found in the `src/bin` folder. They can be configured using environment variables, which are documented below.
 
@@ -103,3 +104,15 @@ Fetches and prints the mint pubkeys of every NFT in the specified wallet.
 | -------------------- | ------------------------------------------------- |
 | RPC_URL              | e.g. `https://api.mainnet-beta.solana.com`        |
 | WALLET_PUBKEY        | The pubkey address of the wallet that owns the NFTs. |
+
+---
+
+## Subscribe to events
+
+`cargo run --bin pubsub` | [Code](./src/bin/pubsub.rs)
+
+Listens to events from [`slotSubscribe`](https://solana.com/docs/rpc/websocket/slotsubscribe).
+
+| Environment Variable | Note                                              |
+| -------------------- | ------------------------------------------------- |
+| WS_URL              | e.g. `wss://api.mainnet-beta.solana.com`        |
