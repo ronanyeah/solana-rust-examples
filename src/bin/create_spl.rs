@@ -6,6 +6,7 @@ use solana_sdk::{
     transaction::Transaction,
 };
 use spl_token::state::Mint;
+use dotenv::dotenv;
 
 #[derive(serde::Deserialize)]
 struct Env {
@@ -15,6 +16,7 @@ struct Env {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
     let env = envy::from_env::<Env>()?;
     let signer_wallet = Keypair::from_base58_string(&env.signer_keypair);
     let mint_account = Keypair::from_base58_string(&env.mint_keypair);
