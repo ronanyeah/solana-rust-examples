@@ -10,6 +10,7 @@ This is a library of Rust scripts for specific purposes:
 - [Get the owner of an NFT](#get-nft-owner)
 - [List NFTs in wallet](#list-nfts-in-wallet)
 - [Subscribe to events](#subscribe-to-events)
+- [Fetch onchain Anchor IDL](#fetch-onchain-anchor-idl)
 
 The scripts are found in the `src/bin` folder. They can be configured using environment variables, which are documented below.
 
@@ -116,3 +117,16 @@ Listens to events from [`slotSubscribe`](https://solana.com/docs/rpc/websocket/s
 | Environment Variable | Note                                              |
 | -------------------- | ------------------------------------------------- |
 | WS_URL              | e.g. `wss://api.mainnet-beta.solana.com`        |
+
+---
+
+## Fetch onchain Anchor IDL
+
+`cargo run --bin fetch_idl` | [Code](./src/bin/fetch_idl.rs)
+
+Fetches an [`Anchor IDL`](https://solana.com/docs/programs/anchor/idl) from a program address.
+
+| Environment Variable | Note                                              |
+| -------------------- | ------------------------------------------------- |
+| WS_URL              | e.g. `wss://api.mainnet-beta.solana.com`           |
+| PROGRAM_ID        | The program address pubkey. e.g. `whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc` |
