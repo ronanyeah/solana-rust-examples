@@ -1,4 +1,5 @@
-use solana_client::rpc_client::RpcClient;
+use solana_account_decoder::{parse_token::UiTokenAccount, UiAccountData};
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 
 #[derive(serde::Deserialize)]
@@ -7,67 +8,40 @@ struct Env {
     wallet_pubkey: String,
 }
 
-#[derive(serde::Deserialize)]
-struct Parsed {
-    info: SplToken,
-}
-
-#[derive(serde::Deserialize)]
-struct SplToken {
-    mint: String,
-    #[serde(rename(deserialize = "tokenAmount"))]
-    token_amount: Amount,
-}
-
-#[allow(dead_code)]
-#[derive(serde::Deserialize)]
-struct Amount {
-    amount: String,
-    #[serde(rename(deserialize = "uiAmountString"))]
-    ui_amount_string: String,
-    #[serde(rename(deserialize = "uiAmount"))]
-    ui_amount: f64,
-    decimals: u8,
-}
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = envy::from_env::<Env>()?;
     let client = RpcClient::new(env.rpc_url.to_string());
     let wallet: Pubkey = env.wallet_pubkey.parse()?;
 
-    let tokens = get_token_accounts(&client, &wallet)?;
+    let token_accounts = client
+        .get_token_accounts_by_owner(
+            &wallet,
+            solana_client::rpc_request::TokenAccountsFilter::ProgramId(spl_token::ID),
+        )
+        .await?;
 
-    let accounts: Vec<_> = tokens
+    let parsed_accounts = token_accounts
+        .clone()
         .iter()
-        .filter_map(|x| {
-            if let solana_account_decoder::UiAccountData::Json(d) = &x.account.data {
-                Some(d)
-            } else {
-                None
-            }
+        .map(|token_account| {
+            let UiAccountData::Json(json_data) = &token_account.account.data else {
+                return Err("non-JSON token account data returned")?;
+            };
+            let info = json_data.parsed.get("info").ok_or("missing 'info' field")?;
+            let data = serde_json::from_value::<UiTokenAccount>(info.clone())?;
+            Ok::<_, Box<dyn std::error::Error>>(data)
         })
-        .collect();
+        .collect::<Result<Vec<_>, _>>()?;
 
-    let parsed: Vec<_> = accounts
-        .iter()
-        .filter_map(|x| serde_json::from_value::<Parsed>(x.parsed.clone()).ok())
-        .filter(|x| x.info.token_amount.decimals == 0 && x.info.token_amount.ui_amount == 1.0)
-        .map(|x| x.info.mint)
+    let nfts: Vec<_> = parsed_accounts
+        .into_iter()
+        .filter(|acct| acct.token_amount.decimals == 0 && acct.token_amount.ui_amount == Some(1.0))
+        .map(|acct| acct.mint)
         .collect();
 
     println!("NFTs owned by {}:", wallet.to_string());
-    println!("{:#?}", parsed);
+    println!("{:#?}", nfts);
 
     Ok(())
-}
-
-fn get_token_accounts(
-    rpc: &RpcClient,
-    owner: &Pubkey,
-) -> Result<Vec<solana_client::rpc_response::RpcKeyedAccount>, Box<dyn std::error::Error>> {
-    rpc.get_token_accounts_by_owner(
-        &owner,
-        solana_client::rpc_request::TokenAccountsFilter::ProgramId(spl_token::ID),
-    )
-    .map_err(|e| e.into())
 }
