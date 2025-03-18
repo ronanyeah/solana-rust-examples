@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+async-recursion = "1.1.1"
 chrono = "0.4.40"
 envy = "0.4.2"
 flate2 = "1.1.0"

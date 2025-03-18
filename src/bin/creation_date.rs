@@ -1,6 +1,6 @@
 use chrono::prelude::*;
 use solana_client::{
-    rpc_client::RpcClient, rpc_response::RpcConfirmedTransactionStatusWithSignature,
+    nonblocking::rpc_client::RpcClient, rpc_response::RpcConfirmedTransactionStatusWithSignature,
 };
 use solana_sdk::{pubkey::Pubkey, signature::Signature};
 use std::{
@@ -14,13 +14,14 @@ struct Env {
     account_pubkey: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = envy::from_env::<Env>()?;
     let rpc = RpcClient::new(env.rpc_url.to_string());
 
     let addr: Pubkey = env.account_pubkey.parse()?;
 
-    let datetime = get_account_creation_date(&rpc, &addr)?;
+    let datetime = get_account_creation_date(&rpc, &addr).await?;
 
     let timestamp_str = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -30,22 +31,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn get_account_creation_date(
+async fn get_account_creation_date(
     rpc: &RpcClient,
     addr: &Pubkey,
 ) -> Result<DateTime<Utc>, Box<dyn std::error::Error>> {
-    fn fetch(
+    #[async_recursion::async_recursion]
+    async fn fetch(
         rpc: &RpcClient,
         addr: &Pubkey,
         before: Option<Signature>,
     ) -> Result<RpcConfirmedTransactionStatusWithSignature, Box<dyn std::error::Error>> {
-        let mut sigs = rpc.get_signatures_for_address_with_config(
-            &addr,
-            solana_client::rpc_client::GetConfirmedSignaturesForAddress2Config {
-                before,
-                ..Default::default()
-            },
-        )?;
+        let mut sigs = rpc
+            .get_signatures_for_address_with_config(
+                &addr,
+                solana_client::rpc_client::GetConfirmedSignaturesForAddress2Config {
+                    before,
+                    ..Default::default()
+                },
+            )
+            .await?;
 
         sigs.sort_by_key(|sig| sig.block_time);
 
@@ -55,11 +59,11 @@ fn get_account_creation_date(
             Ok(earliest.clone())
         } else {
             let sig = Signature::from_str(&earliest.signature)?;
-            fetch(&rpc, &addr, Some(sig))
+            fetch(&rpc, &addr, Some(sig)).await
         }
     }
 
-    let status = fetch(&rpc, &addr, None)?;
+    let status = fetch(&rpc, &addr, None).await?;
 
     let d = UNIX_EPOCH
         + Duration::from_secs(status.block_time.ok_or("Missing block time!")?.try_into()?);

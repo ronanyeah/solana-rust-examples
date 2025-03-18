@@ -1,4 +1,4 @@
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{
     instruction::Instruction,
     pubkey::Pubkey,
@@ -14,7 +14,8 @@ struct Env {
     receiver_pubkey: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = envy::from_env::<Env>()?;
     let signer_wallet = Keypair::from_base58_string(&env.signer_keypair);
     let client = RpcClient::new(env.rpc_url.to_string());
@@ -45,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         amount,
     )?;
 
-    let recent_blockhash = client.get_latest_blockhash()?;
+    let recent_blockhash = client.get_latest_blockhash().await?;
     let transaction: Transaction = Transaction::new_signed_with_payer(
         &[assoc_instruction, mint_to_instruction],
         Some(&signer_wallet.pubkey()),
@@ -53,7 +54,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         recent_blockhash,
     );
 
-    client.send_and_confirm_transaction_with_spinner(&transaction)?;
+    client
+        .send_and_confirm_transaction_with_spinner(&transaction)
+        .await?;
 
     println!("SPL Tokens minted successfully.");
     println!("Amount: {}", amount);

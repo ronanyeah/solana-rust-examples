@@ -1,4 +1,4 @@
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{
     instruction::Instruction,
     program_pack::Pack,
@@ -14,7 +14,8 @@ struct Env {
     mint_keypair: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = envy::from_env::<Env>()?;
     let signer_wallet = Keypair::from_base58_string(&env.signer_keypair);
     let mint_account = Keypair::from_base58_string(&env.mint_keypair);
@@ -22,8 +23,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let decimals = 9;
 
-    let minimum_balance_for_rent_exemption =
-        client.get_minimum_balance_for_rent_exemption(Mint::LEN)?;
+    let minimum_balance_for_rent_exemption = client
+        .get_minimum_balance_for_rent_exemption(Mint::LEN)
+        .await?;
 
     let create_account_instruction: Instruction = solana_sdk::system_instruction::create_account(
         &signer_wallet.pubkey(),
@@ -41,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         decimals,
     )?;
 
-    let recent_blockhash = client.get_latest_blockhash()?;
+    let recent_blockhash = client.get_latest_blockhash().await?;
 
     let transaction: Transaction = Transaction::new_signed_with_payer(
         &[create_account_instruction, initialize_mint_instruction],
@@ -50,7 +52,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         recent_blockhash,
     );
 
-    client.send_and_confirm_transaction_with_spinner(&transaction)?;
+    client
+        .send_and_confirm_transaction_with_spinner(&transaction)
+        .await?;
 
     println!(
         "SPL Token mint account with {} decimals created successfully:\n{}",

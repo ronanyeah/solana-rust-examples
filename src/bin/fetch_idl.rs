@@ -1,5 +1,5 @@
 use flate2::read::ZlibDecoder;
-use solana_client::rpc_client::RpcClient;
+use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 use std::io::Read;
 
@@ -9,7 +9,8 @@ struct Env {
     program_id: String,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let env = envy::from_env::<Env>()?;
     let client = RpcClient::new(env.rpc_url.to_string());
     let program_id: Pubkey = env.program_id.parse()?;
@@ -18,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let idl_address = Pubkey::create_with_seed(&base, "anchor:idl", &program_id)?;
 
-    let idl_account_data = client.get_account_data(&idl_address)?;
+    let idl_account_data = client.get_account_data(&idl_address).await?;
 
     let len = u32::from_le_bytes(idl_account_data[40..44].try_into()?);
 
