@@ -24,21 +24,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let amount = 10_000;
 
-    let assoc = spl_associated_token_account::get_associated_token_address(
+    let assoc = spl_associated_token_account_interface::address::get_associated_token_address(
         &receiver_pubkey,
         &mint_account_pubkey,
     );
 
-    #[allow(deprecated)]
-    // https://github.com/solana-labs/solana-program-library/issues/2791
-    let assoc_instruction = spl_associated_token_account::create_associated_token_account(
-        &signer_wallet.pubkey(),
-        &receiver_pubkey,
-        &mint_account_pubkey,
-    );
+    let assoc_instruction =
+        spl_associated_token_account_interface::instruction::create_associated_token_account(
+            &signer_wallet.pubkey(),
+            &receiver_pubkey,
+            &mint_account_pubkey,
+            &spl_token_interface::ID,
+        );
 
-    let mint_to_instruction: Instruction = spl_token::instruction::mint_to(
-        &spl_token::ID,
+    let mint_to_instruction: Instruction = spl_token_interface::instruction::mint_to(
+        &spl_token_interface::ID,
         &mint_account_pubkey,
         &assoc,
         &signer_wallet.pubkey(),

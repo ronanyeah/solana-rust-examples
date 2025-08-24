@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let account = fetch_nft_account(&client, &mint).await?;
 
-    let token_account = spl_token::state::Account::unpack(&mut account.data())?;
+    let token_account = spl_token_interface::state::Account::unpack(&mut account.data())?;
 
     println!("{} owner:\n{}", mint.to_string(), token_account.owner);
 
@@ -49,7 +49,7 @@ async fn fetch_nft_account(
 
     let accounts = client
         .get_program_accounts_with_config(
-            &spl_token::ID,
+            &spl_token_interface::ID,
             RpcProgramAccountsConfig {
                 filters,
                 account_config: RpcAccountInfoConfig {

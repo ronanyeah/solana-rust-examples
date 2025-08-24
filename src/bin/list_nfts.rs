@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let token_accounts = client
         .get_token_accounts_by_owner(
             &wallet,
-            solana_client::rpc_request::TokenAccountsFilter::ProgramId(spl_token::ID),
+            solana_client::rpc_request::TokenAccountsFilter::ProgramId(spl_token_interface::ID),
         )
         .await?;
 

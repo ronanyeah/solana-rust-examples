@@ -4,7 +4,7 @@ use solana_account_decoder::{
 };
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
-use spl_token_2022::{
+use spl_token_2022_interface::{
     extension::{ExtensionType::TokenMetadata, StateWithExtensions},
     state::Mint,
 };

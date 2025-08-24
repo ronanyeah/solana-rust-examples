@@ -5,7 +5,7 @@ use solana_sdk::{
     signer::{keypair::Keypair, Signer},
     transaction::Transaction,
 };
-use spl_token::state::Mint;
+use spl_token_interface::state::Mint;
 
 #[derive(serde::Deserialize)]
 struct Env {
@@ -27,21 +27,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get_minimum_balance_for_rent_exemption(Mint::LEN)
         .await?;
 
-    let create_account_instruction: Instruction = solana_sdk::system_instruction::create_account(
-        &signer_wallet.pubkey(),
-        &mint_account.pubkey(),
-        minimum_balance_for_rent_exemption,
-        Mint::LEN as u64,
-        &spl_token::ID,
-    );
+    let create_account_instruction: Instruction =
+        solana_system_interface::instruction::create_account(
+            &signer_wallet.pubkey(),
+            &mint_account.pubkey(),
+            minimum_balance_for_rent_exemption,
+            Mint::LEN as u64,
+            &spl_token_interface::ID,
+        );
 
-    let initialize_mint_instruction: Instruction = spl_token::instruction::initialize_mint(
-        &spl_token::ID,
-        &mint_account.pubkey(),
-        &signer_wallet.pubkey(),
-        None,
-        decimals,
-    )?;
+    let initialize_mint_instruction: Instruction =
+        spl_token_interface::instruction::initialize_mint(
+            &spl_token_interface::ID,
+            &mint_account.pubkey(),
+            &signer_wallet.pubkey(),
+            None,
+            decimals,
+        )?;
 
     let recent_blockhash = client.get_latest_blockhash().await?;
 

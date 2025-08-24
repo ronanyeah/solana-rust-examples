@@ -16,7 +16,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rpc = RpcClient::new(env.rpc_url.to_string());
 
-    let addr = spl_associated_token_account::get_associated_token_address(&target, &mint_id);
+    let addr = spl_associated_token_account_interface::address::get_associated_token_address(
+        &target, &mint_id,
+    );
 
     let balance = rpc.get_token_account_balance(&addr).await?;
 
