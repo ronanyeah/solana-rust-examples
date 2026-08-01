@@ -1,4 +1,4 @@
-use solana_sdk::signer::{keypair::Keypair, Signer};
+use solana_sdk::signer::{Signer, keypair::Keypair};
 
 fn main() {
     let pair = Keypair::new();

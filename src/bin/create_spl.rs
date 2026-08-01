@@ -1,9 +1,9 @@
 use solana_client::nonblocking::rpc_client::RpcClient;
+use solana_client::rpc_response::transaction::Transaction;
 use solana_sdk::{
     instruction::Instruction,
     program_pack::Pack,
-    signer::{keypair::Keypair, Signer},
-    transaction::Transaction,
+    signer::{Signer, keypair::Keypair},
 };
 use spl_token_interface::state::Mint;
 

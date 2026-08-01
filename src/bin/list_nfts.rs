@@ -1,4 +1,4 @@
-use solana_account_decoder::{parse_token::UiTokenAccount, UiAccountData};
+use solana_account_decoder::{UiAccountData, parse_token::UiTokenAccount};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 

@@ -3,7 +3,6 @@ use solana_client::{
     rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},
     rpc_filter::{Memcmp, MemcmpEncodedBytes, RpcFilterType},
 };
-use solana_sdk::account::ReadableAccount;
 use solana_sdk::{program_pack::Pack, pubkey::Pubkey};
 
 #[derive(serde::Deserialize)]
@@ -20,7 +19,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let account = fetch_nft_account(&client, &mint).await?;
 
-    let token_account = spl_token_interface::state::Account::unpack(&mut account.data())?;
+    let token_account =
+        spl_token_interface::state::Account::unpack(&mut account.data.decode().unwrap())?;
 
     println!("{} owner:\n{}", mint.to_string(), token_account.owner);
 
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn fetch_nft_account(
     client: &RpcClient,
     mint: &Pubkey,
-) -> Result<solana_sdk::account::Account, Box<dyn std::error::Error>> {
+) -> Result<solana_client::rpc_response::UiAccount, Box<dyn std::error::Error>> {
     let filters = Some(vec![
         // account size
         RpcFilterType::DataSize(165),
@@ -48,12 +48,12 @@ async fn fetch_nft_account(
     ]);
 
     let accounts = client
-        .get_program_accounts_with_config(
+        .get_program_ui_accounts_with_config(
             &spl_token_interface::ID,
             RpcProgramAccountsConfig {
                 filters,
                 account_config: RpcAccountInfoConfig {
-                    encoding: Some(solana_account_decoder::UiAccountEncoding::Base64),
+                    encoding: Some(solana_client::rpc_config::UiAccountEncoding::Base64),
                     ..Default::default()
                 },
                 with_context: None,

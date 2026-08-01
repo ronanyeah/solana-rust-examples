@@ -1,9 +1,9 @@
 use solana_client::nonblocking::rpc_client::RpcClient;
+use solana_client::rpc_response::transaction::Transaction;
 use solana_sdk::{
     instruction::Instruction,
     pubkey::Pubkey,
-    signer::{keypair::Keypair, Signer},
-    transaction::Transaction,
+    signer::{Signer, keypair::Keypair},
 };
 
 #[derive(serde::Deserialize)]
